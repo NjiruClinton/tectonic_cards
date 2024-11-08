@@ -1,45 +1,30 @@
 package registercard
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
+	"strings"
 	"tectonic_cards/config"
 )
 
-type RegisterCardRequest struct {
-	PrimaryAccountNumber string `json:"primaryAccountNumber"`
+type Response struct {
+	Resource struct {
+		DocumentID string `json:"documentID"`
+	} `json:"resource"`
 }
 
-func RegisterCard(panPrefix string) {
-	AUTH := config.GetAuthHeader()
-	BASIC_URL := "https://sandbox.api.visa.com/vctc"
-
-	tlsConfig, _ := config.SetupTLSConfig()
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
-	client := &http.Client{Transport: transport}
-
-	url := BASIC_URL + "/customerrules/v1/consumertransactioncontrols"
-	fmt.Print("Registering card with PAN: ", panPrefix+"0001\n")
-	requestBody := RegisterCardRequest{
-		PrimaryAccountNumber: panPrefix + "0001",
-	}
-	jsonBody, _ := json.Marshal(requestBody)
-
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
-	req.Header.Add("Authorization", AUTH)
-
-	res, err := client.Do(req)
+func RegisterCard(panPrefix string) (string, error) {
+	payload := strings.NewReader(fmt.Sprintf(`{
+	"primaryAccountNumber": "%s0001"
+		}`, panPrefix))
+	body, err := config.MakeHTTPRequest("POST", "/customerrules/v1/consumertransactioncontrols", payload)
 	if err != nil {
-		log.Fatalf("Error making HTTP request: %v", err)
+		return "", err
 	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received non-200 response code: %v", res.StatusCode)
+	var response Response
+	err = json.Unmarshal([]byte(body), &response)
+	if err != nil {
+		return "", err
 	}
-
-	log.Println("Card registered successfully")
+	return response.Resource.DocumentID, nil
 }

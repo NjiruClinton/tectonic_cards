@@ -3,7 +3,6 @@ package panprefix
 import (
 	"encoding/json"
 	"log"
-	"net/http"
 	"tectonic_cards/config"
 )
 
@@ -23,25 +22,12 @@ type ResponseBody struct {
 }
 
 func RetrievePANPrefix() string {
-	AUTH := config.GetAuthHeader()
-	BASIC_URL := "https://sandbox.api.visa.com/vctc"
-
-	tlsConfig, err := config.SetupTLSConfig()
-	if err != nil {
-		log.Fatalf("Error setting up TLS configuration: %v", err)
-	}
-
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
-	client := &http.Client{Transport: transport}
-
-	url := BASIC_URL + "/programadmin/v1/sponsors/configuration"
-	body, _ := config.MakeHTTPRequest(client, url, AUTH)
+	body, _ := config.MakeHTTPRequest("GET", "/programadmin/v1/sponsors/configuration", nil)
 	var responseBody ResponseBody
-	err = json.Unmarshal([]byte(body), &responseBody)
+	err := json.Unmarshal([]byte(body), &responseBody)
 	if err != nil {
 		log.Fatalf("Error unmarshalling JSON response: %v", err)
 	}
-
 	for _, cardPrefix := range responseBody.Resource.CardPrefixes {
 		if cardPrefix.PrefixRangeIdentifier == "PAN" && len(cardPrefix.PrefixStartRange) == 12 {
 			panPrefix = cardPrefix.PrefixStartRange

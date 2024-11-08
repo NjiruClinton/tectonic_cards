@@ -49,12 +49,23 @@ func GetAuthHeader() string {
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(userID+":"+password))
 }
 
-func MakeHTTPRequest(client *http.Client, url, auth string) (string, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func MakeHTTPRequest(method string, url string, payload io.Reader) (string, error) {
+	AUTH := GetAuthHeader()
+	finalURL := "https://sandbox.api.visa.com/vctc" + url
+	req, err := http.NewRequest(method, finalURL, payload)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", auth)
+	req.Header.Add("Authorization", AUTH)
+	if payload != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
+	tlsConfig, err := SetupTLSConfig()
+	if err != nil {
+		log.Fatalf("Error setting up TLS configuration: %v", err)
+	}
+	transport := &http.Transport{TLSClientConfig: tlsConfig}
+	client := &http.Client{Transport: transport}
 
 	res, err := client.Do(req)
 	if err != nil {
