@@ -2,3 +2,4 @@
 /cacert.pem
 /cert.pem
 /.env
+/tmp/
