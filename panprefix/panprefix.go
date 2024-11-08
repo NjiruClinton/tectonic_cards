@@ -23,11 +23,10 @@ type ResponseBody struct {
 }
 
 func RetrievePANPrefix() string {
-	USER_ID, PASSWORD := config.LoadEnvVariables()
-	AUTH := config.GetAuthHeader(USER_ID, PASSWORD)
+	AUTH := config.GetAuthHeader()
 	BASIC_URL := "https://sandbox.api.visa.com/vctc"
 
-	tlsConfig, err := config.SetupTLSConfig("./cert.pem", "./key.pem", "./cacert.pem")
+	tlsConfig, err := config.SetupTLSConfig()
 	if err != nil {
 		log.Fatalf("Error setting up TLS configuration: %v", err)
 	}

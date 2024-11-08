@@ -25,12 +25,12 @@ func LoadEnvVariables() (string, string) {
 	return USER_ID, PASSWORD
 }
 
-func SetupTLSConfig(certFile, keyFile, caCertFile string) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+func SetupTLSConfig() (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair("./cert.pem", "./key.pem")
 	if err != nil {
 		return nil, err
 	}
-	caCert, err := os.ReadFile(caCertFile)
+	caCert, err := os.ReadFile("./cacert.pem")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,8 @@ func SetupTLSConfig(certFile, keyFile, caCertFile string) (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
-func GetAuthHeader(userID, password string) string {
+func GetAuthHeader() string {
+	userID, password := LoadEnvVariables()
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(userID+":"+password))
 }
 

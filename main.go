@@ -7,4 +7,6 @@ import (
 func main() {
 	pan := panprefix.RetrievePANPrefix()
 	println(pan)
+	//registercard.RegisterCard(pan)
+
 }
