@@ -49,7 +49,7 @@ func GetAuthHeader() string {
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(userID+":"+password))
 }
 
-func MakeHTTPRequest(method string, url string, payload io.Reader) (string, error) {
+func MakeHTTPRequest(method, url string, payload io.Reader) (string, error) {
 	AUTH := GetAuthHeader()
 	finalURL := "https://sandbox.api.visa.com/vctc" + url
 	req, err := http.NewRequest(method, finalURL, payload)

@@ -55,44 +55,44 @@ type CardInquiryPayload struct {
 	PrimaryAccountNumber string `json:"primaryAccountNumber"`
 }
 
-func PerformCardTransaction(panPrefix, dateTimeLocal, howPresented string, isDomestic bool) (string, error) {
+func PerformCardTransaction(panPrefix, dateTimeLocal, howPresented string, isDomestic bool, data map[string]interface{}) (string, error) {
 	url := "/validation/v1/decisions"
 	merchantInfo := MerchantInfo{
-		CountryCode:          "GBR",
-		CurrencyCode:         "826",
-		MerchantCategoryCode: "5813",
+		CountryCode:          data["countryCode"].(string),
+		CurrencyCode:         data["currencyCode"].(string),
+		MerchantCategoryCode: data["merchantCategoryCode"].(string),
 	}
 	if !isDomestic {
-		merchantInfo.AddressLines = []string{"221B Baker St"}
-		merchantInfo.CardAcceptorTerminalID = "1"
-		merchantInfo.City = "London"
-		merchantInfo.Name = "Holmes Detective Agency"
-		merchantInfo.TransactionAmount = 100
+		merchantInfo.AddressLines = data["addressLines"].([]string)
+		merchantInfo.CardAcceptorTerminalID = data["cardAcceptorTerminalID"].(string)
+		merchantInfo.City = data["city"].(string)
+		merchantInfo.Name = data["name"].(string)
+		merchantInfo.TransactionAmount = int(data["transactionAmount"].(float64))
 	}
 	payload := CardPresentTransactionPayload{
 		PrimaryAccountNumber: fmt.Sprintf("%s0001", panPrefix),
 		DecisionType:         "COMPLETE",
-		CardholderBillAmount: 50,
+		CardholderBillAmount: int(data["cardholderBillAmount"].(float64)),
 		MerchantInfo:         merchantInfo,
 		MessageType:          "0100",
 		PointOfServiceInfo: PointOfServiceInfo{
-			PersonalIdentificationNumberEntryMode: "UNKNOWN",
+			PersonalIdentificationNumberEntryMode: data["personalIdentificationNumberEntryMode"].(string),
 			PresentationData: PresentationData{
 				HowPresented:  howPresented,
 				IsCardPresent: howPresented == "CUSTOMER_PRESENT",
 			},
-			PrimaryAccountNumberEntryMode: "MAG_STRIPE_READ",
-			SecurityCondition:             "NO_SECURITY_CONCERN",
+			PrimaryAccountNumberEntryMode: data["primaryAccountNumberEntryMode"].(string),
+			SecurityCondition:             data["securityCondition"].(string),
 			TerminalClass: TerminalClass{
-				DeviceLocation: "ON_PREMISE",
-				HowOperated:    "CUSTOMER_OPERATED",
-				IsAttended:     true,
+				DeviceLocation: data["deviceLocation"].(string),
+				HowOperated:    data["howOperated"].(string),
+				IsAttended:     data["isAttended"].(bool),
 			},
-			TerminalEntryCapability: "MAG_STRIPE_READ",
-			TerminalType:            "POS_TERMINAL",
+			TerminalEntryCapability: data["terminalEntryCapability"].(string),
+			TerminalType:            data["terminalType"].(string),
 		},
-		ProcessingCode:           "000000",
-		RetrievalReferenceNumber: "R00000001",
+		ProcessingCode:           data["processingCode"].(string),
+		RetrievalReferenceNumber: data["retrievalReferenceNumber"].(string),
 		DateTimeLocal:            dateTimeLocal,
 	}
 	payloadBytes, err := json.Marshal(payload)
@@ -106,10 +106,10 @@ func PerformCardTransaction(panPrefix, dateTimeLocal, howPresented string, isDom
 	return body, nil
 }
 
-func RetrieveControls(panPrefix string) (string, error) {
+func RetrieveControls(pan, prefix string) (string, error) {
 	url := "/customerrules/v1/transactiontypecontrols/cardinquiry"
 	payload := CardInquiryPayload{
-		PrimaryAccountNumber: fmt.Sprintf("%s0001", panPrefix),
+		PrimaryAccountNumber: pan + prefix,
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
