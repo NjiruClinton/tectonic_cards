@@ -1,15 +1,49 @@
 ## Visa Transaction Controls API integrations sample codes in Go
-### Inputs
-1. caCertificate './cacert.pem'
-2. clientCertificate './cert.pem'
-3. clientKey './key.pem'
+### Installation
+#### 1. Clone the repository:  
+    git clone https://github.com/NjiruClinton/tectonic_cards.git
+    cd tectonic_cards
+#### 2. Initialize the Go module:  
+    go mod tidy
+### Configuration
+#### 1. Place your certificates in the root directory
+- caCertificate './cacert.pem'
+- clientCertificate './cert.pem'
+- clientKey './key.pem'
 
-#### Environment Variables (`.env` file)
+#### Create a .env file with your Visa Developer credentials:
 ```env
 USER_ID=your_visa_user_id
 PASSWORD=your_visa_password
 ```
-all functions can be initialized from `main.go`  
+
+## Package Functions
+#### Register a Card
+```go
+registered, err := registercard.RegisterCard(panPrefix)
+```
+#### Toggle Card Status
+```go
+response, err := registercard.ToggleCard(documentID, status)
+```
+#### Perform a Card Transaction
+```go
+response, err := transactions.PerformCardTransaction(panPrefix, dateTimeLocal, howPresented, isDomestic)
+```
+#### Delete a Card
+```go
+response, err := registercard.DeleteCard(documentID)
+```
+#### Retrieve Controls
+```go
+response, err := transactions.RetrieveControls(panPrefix)
+```
+#### Create a Customer
+```go
+response, err := customer.CreateCustomer(panPrefix, email, firstName, lastName)
+```
+
+for development all functions and examples can be initialized from `main.go`  
 project is in active maintenance and development
 
 ### Disclaimer
