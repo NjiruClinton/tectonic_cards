@@ -3,6 +3,12 @@
 #### 1. Clone the repository:  
     git clone https://github.com/NjiruClinton/tectonic_cards.git
     cd tectonic_cards
+
+#### For go packages
+```go
+go get github.com/NjiruClinton/tectonic_cards
+```
+##### from here, you can import the package in your project and start using the functions
 #### 2. Initialize the Go module:  
     go mod tidy
 ### Configuration
