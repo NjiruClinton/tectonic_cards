@@ -1,4 +1,4 @@
-module tectonic_cards
+module github.com/NjiruClinton/tectonic_cards
 
 go 1.23.2
 
